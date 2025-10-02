@@ -1,5 +1,6 @@
-
 let demo = document.getElementById("app")
+
+let tareas;
 
 let texto = "Lista de Tareas"
 
@@ -13,7 +14,7 @@ let input = document.createElement("input")
 input.type = "text"
 
 let label1 = document.createElement("label")
-label1.innerHTML = " Descripcion: "
+label1.innerHTML = " Description: "
 let input1 = document.createElement("input")
 input1.type = "text"
 
@@ -27,65 +28,114 @@ demo.appendChild(formu)
 
 demo.appendChild(boton)
 
-boton.addEventListener("click", function () {
+boton.addEventListener("click", function (e) {
+  e.preventDefault();
 
+  let tareas = JSON.parse(localStorage.getItem("tareasSave")) || [];
+  let contadorId = parseInt(localStorage.getItem("contadorId")) || 1;
+
+  let nuevaTarea = {
+    id: contadorId,
+    tarea: input.value,
+    descripcion: input1.value,
+    Estado: "Incompleta"
+  };
+
+  tareas.push(nuevaTarea);
+  localStorage.setItem("tareasSave", JSON.stringify(tareas));
+  localStorage.setItem("contadorId", contadorId + 1);
+
+  
   let form2 = document.createElement("form")
 
-  let label = document.createElement("label")
-  label.innerHTML = "incompleta"
+  let labelIncompleta = document.createElement("label")
+  labelIncompleta.innerHTML = "incompleta"
   let incompleta = document.createElement("input")
   incompleta.type = "radio"
   incompleta.checked = true
-  incompleta.name = "Estado"
+  incompleta.name = "Estado_" + contadorId
   incompleta.value = "Incompleta"
 
-  let label1 = document.createElement("label")
-  label1.innerHTML = "completa"
+  let labelCompleta = document.createElement("label")
+  labelCompleta.innerHTML = "completa"
   let completa = document.createElement("input")
   completa.type = "radio"
-  completa.name = "Estado"
+  completa.name = "Estado_" + contadorId
   completa.value = "Completa"
 
+  form2.append(incompleta, labelIncompleta, completa, labelCompleta)
+
   let li = document.createElement("li")
-  let ol = document.createElement("lo")
+  li.textContent = `Tarea: ${input.value} Descripción: ${input1.value}`
 
-  ol.innerHTML = "Tarea: " + input.value + " Descripcion: " + input1.value
+  li.appendChild(form2)
 
-  form2.append(incompleta, label, completa, label1)
+  demo.appendChild(li)
 
-  li.append(ol, form2)
+  input.value = "";
+  input1.value = "";
 
-  let botonGuardar = document.createElement("button")
-  botonGuardar.value = "Guardar Tareas"
-  botonGuardar.innerHTML = "Guardar"
-  botonGuardar.type = "submit"
+  form2.addEventListener("change", function () {
+    let seleccionado = form2.querySelector('input[name="Estado_' + contadorId + '"]:checked');
 
-  botonGuardar.addEventListener("click", function () {
-    let seleccionado = form2.querySelector('input[name="Estado"]:checked');
+    if (!seleccionado) return;
 
-    let tareas;
-    if (localStorage.getItem("tareasSave")) {
-      tareas = JSON.parse(localStorage.getItem("tareasSave"));
-    } else {
-      tareas = [];
+    for (let i = 0; i < tareas.length; i++) {
+      if (tareas[i].id === contadorId) {
+        tareas[i].Estado = seleccionado.value;
+        break;
+      }
     }
 
-    let tareasObj = {
-
-      tarea: input.value,
-
-      descripcion: input1.value,
-
-      Estado: seleccionado.value,
-
-    }
-
-    tareas.push(tareasObj)
-
-    localStorage.setItem("tareasSave", JSON.stringify(tareas))
-
+    localStorage.setItem("tareasSave", JSON.stringify(tareas));
   })
-
-  demo.append(li, botonGuardar)
-
 })
+
+
+window.addEventListener("load", function () {
+  let tareasGuardadas = JSON.parse(localStorage.getItem("tareasSave")) || [];
+
+  for (let i = 0; i < tareasGuardadas.length; i++) {
+    let tarea = tareasGuardadas[i];
+
+    let form2 = document.createElement("form")
+
+    let labelIncompleta = document.createElement("label")
+    labelIncompleta.innerHTML = "incompleta"
+    let incompleta = document.createElement("input")
+    incompleta.type = "radio"
+    incompleta.name = "Estado_" + tarea.id
+    incompleta.value = "Incompleta"
+    if (tarea.Estado === "Incompleta") incompleta.checked = true
+
+    let labelCompleta = document.createElement("label")
+    labelCompleta.innerHTML = "completa"
+    let completa = document.createElement("input")
+    completa.type = "radio"
+    completa.name = "Estado_" + tarea.id
+    completa.value = "Completa"
+    if (tarea.Estado === "Completa") completa.checked = true
+
+    form2.append(incompleta, labelIncompleta, completa, labelCompleta)
+
+    let li = document.createElement("li")
+    li.textContent = `Tarea: ${tarea.tarea} Descripción: ${tarea.descripcion}`
+    li.appendChild(form2)
+
+    demo.appendChild(li)
+
+    form2.addEventListener("change", function () {
+      let seleccionado = form2.querySelector('input[name="Estado_' + tarea.id + '"]:checked');
+      if (!seleccionado) return;
+
+      let tareas = JSON.parse(localStorage.getItem("tareasSave")) || [];
+      for (let j = 0; j < tareas.length; j++) {
+        if (tareas[j].id === tarea.id) {
+          tareas[j].Estado = seleccionado.value;
+          break;
+        }
+      }
+      localStorage.setItem("tareasSave", JSON.stringify(tareas));
+    })
+  }
+});
