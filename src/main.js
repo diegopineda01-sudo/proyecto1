@@ -37,7 +37,7 @@ boton.addEventListener("click", function (e) {
   let nuevaTarea = {
     id: contadorId,
     tarea: input.value,
-    descripcion: input1.value,
+    description: input1.value,
     Estado: "Incompleta"
   };
 
@@ -119,7 +119,7 @@ window.addEventListener("load", function () {
     form2.append(incompleta, labelIncompleta, completa, labelCompleta)
 
     let li = document.createElement("li")
-    li.textContent = `Tarea: ${tarea.tarea} Descripción: ${tarea.descripcion}`
+    li.textContent = `Tarea: ${tarea.tarea} Descripción: ${tarea.description}`
     li.appendChild(form2)
 
     demo.appendChild(li)
